@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Call Monitor</string>
+    <string name="not_connected">You are not connected with Internet</string>
+    <string name="start_server">Start server</string>
+    <string name="stop_server">Stop server</string>
+    <string name="server_is_running">Server is running</string>
+    <string name="feature_settings_top_app_bar_action_icon_description">Settings</string>
+    <string name="feature_settings_top_app_bar_navigation_icon_description">Search</string>
+    <string name="sync_work_notification_channel_name">Sync</string>
+    <string name="sync_work_notification_channel_description">Background tasks for Call Monitor</string>
+    <string name="feature_home_loading">Loading...</string>
+</resources>

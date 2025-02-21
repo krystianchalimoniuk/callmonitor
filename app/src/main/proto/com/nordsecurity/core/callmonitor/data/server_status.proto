@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.nordsecurity.callmonitor.core.datastore";
+option java_multiple_files = true;
+
+message ServerStatusProto {
+  string startTime = 1;
+  bool isRunning = 2;
+}
