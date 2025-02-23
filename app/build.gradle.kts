@@ -124,6 +124,7 @@ dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
     kspTest(libs.hilt.compiler)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.kotlinx.coroutines.guava)
     implementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)

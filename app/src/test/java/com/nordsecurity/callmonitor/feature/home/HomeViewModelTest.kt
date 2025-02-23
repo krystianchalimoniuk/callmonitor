@@ -7,6 +7,7 @@ import com.nordsecurity.callmonitor.core.testing.repository.TestCallResourceRepo
 import com.nordsecurity.callmonitor.core.testing.repository.TestUserDataRepository
 import com.nordsecurity.callmonitor.core.testing.util.MainDispatcherRule
 import com.nordsecurity.callmonitor.core.testing.util.TestIpAddressProvider
+import com.nordsecurity.callmonitor.core.testing.util.TestNetworkMonitor
 import com.nordsecurity.callmonitor.core.testing.util.TestServerServiceController
 import com.nordsecurity.callmonitor.core.testing.util.TestSyncManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +30,7 @@ class HomeViewModelTest {
     private val ipAddressProvider = TestIpAddressProvider()
     private val serverServiceController = TestServerServiceController()
     private val savedStateHandle = SavedStateHandle()
+    private val networkMonitor = TestNetworkMonitor()
 
     private lateinit var viewModel: HomeViewModel
 
@@ -40,7 +42,8 @@ class HomeViewModelTest {
             serverServiceController = serverServiceController,
             callResourceRepository = callResourceRepository,
             syncManager = syncManager,
-            userDataRepository = userDataRepository
+            userDataRepository = userDataRepository,
+            networkMonitor = networkMonitor
         )
     }
 

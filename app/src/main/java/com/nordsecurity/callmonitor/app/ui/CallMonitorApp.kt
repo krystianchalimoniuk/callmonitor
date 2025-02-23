@@ -50,20 +50,6 @@ fun CallMonitorApp(
     CallMonitorBackground(modifier = modifier) {
         CallMonitorGradientBackground(gradientColors = LocalGradientColors.current) {
             val snackbarHostState = remember { SnackbarHostState() }
-
-            val isOffline by appState.isOffline.collectAsStateWithLifecycle()
-
-            // If user is not connected to the internet show a snack bar to inform them.
-            val notConnectedMessage = stringResource(R.string.not_connected)
-            LaunchedEffect(isOffline) {
-                if (isOffline) {
-                    snackbarHostState.showSnackbar(
-                        message = notConnectedMessage,
-                        duration = Indefinite,
-                    )
-                }
-            }
-
             CallMonitorApp(
                 appState = appState,
                 snackbarHostState = snackbarHostState,

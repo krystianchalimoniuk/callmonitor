@@ -11,18 +11,23 @@ import androidx.compose.ui.util.trace
 import androidx.core.content.getSystemService
 import com.nordsecurity.callmonitor.core.common.network.CallMonitorDispatchers
 import com.nordsecurity.callmonitor.core.common.network.Dispatcher
+import com.nordsecurity.callmonitor.core.common.network.di.ApplicationScope
 import com.nordsecurity.callmonitor.core.domain.NetworkMonitor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ConnectivityManagerNetworkMonitor @Inject constructor(
     @ApplicationContext private val context: Context,
+    @ApplicationScope private val appScope: CoroutineScope,
     @Dispatcher(CallMonitorDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
 ) : NetworkMonitor {
     override val isOnline: Flow<Boolean> = callbackFlow {
@@ -47,8 +52,11 @@ internal class ConnectivityManagerNetworkMonitor @Inject constructor(
                 private val networks = mutableSetOf<Network>()
 
                 override fun onAvailable(network: Network) {
-                    networks += network
-                    channel.trySend(true)
+                    appScope.launch {
+                        delay(1000)
+                        networks += network
+                        channel.trySend(true)
+                    }
                 }
 
                 override fun onLost(network: Network) {
@@ -59,7 +67,7 @@ internal class ConnectivityManagerNetworkMonitor @Inject constructor(
 
             trace("NetworkMonitor.registerNetworkCallback") {
                 val request = Builder()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .build()
                 connectivityManager.registerNetworkCallback(request, callback)
             }
@@ -71,7 +79,7 @@ internal class ConnectivityManagerNetworkMonitor @Inject constructor(
             /**
              * Sends the latest connectivity status to the underlying channel.
              */
-            channel.trySend(connectivityManager.isCurrentlyConnected())
+            channel.trySend(connectivityManager.isWifiConnected())
 
             awaitClose {
                 connectivityManager.unregisterNetworkCallback(callback)
@@ -81,7 +89,7 @@ internal class ConnectivityManagerNetworkMonitor @Inject constructor(
         .flowOn(ioDispatcher)
         .conflate()
 
-    private fun ConnectivityManager.isCurrentlyConnected() = activeNetwork
+    private fun ConnectivityManager.isWifiConnected() = activeNetwork
         ?.let(::getNetworkCapabilities)
-        ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+        ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ?: false
 }

@@ -1,6 +1,5 @@
 package com.nordsecurity.callmonitor.core.data.repository
 
-import com.nordsecurity.callmonitor.core.analytics.NoOpAnalyticsHelper
 import com.nordsecurity.callmonitor.core.data.repositories.DefaultUserDataRepository
 import com.nordsecurity.callmonitor.core.datastore.CallMonitorPreferenceDataSource
 import com.nordsecurity.callmonitor.core.datastore.UserPreferences
