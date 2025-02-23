@@ -7,6 +7,7 @@ import com.nordsecurity.callmonitor.core.domain.CallResourceRepository
 import com.nordsecurity.callmonitor.core.network.HttpServerManager
 import com.nordsecurity.callmonitor.core.domain.IpAddressProvider
 import com.nordsecurity.callmonitor.core.domain.UserDataRepository
+import com.nordsecurity.callmonitor.core.network.model.NetworkError
 import com.nordsecurity.callmonitor.core.network.model.NetworkServerStatus
 import com.nordsecurity.callmonitor.core.network.model.Service
 import io.ktor.http.ContentType
@@ -55,15 +56,29 @@ class KtorHttpServerManager @Inject constructor(
                         )
                     }
                     get("/log") {
-                        repository.refreshCallResources()
-                        val recentCalls = repository.getCallResources(useNew = true).first()
-                        call.respondText(
-                            text = Json.encodeToString(recentCalls.map {
-                                it.asNetworkResource()
-                            }),
-                            contentType = ContentType.Application.Json,
-                        )
-                        repository.incrementQueryCounterFor(recentCalls.map { it.asEntity() })
+                        try {
+                            repository.refreshCallResources()
+                            val recentCalls = repository.getCallResources(useNew = true).first()
+                            call.respondText(
+                                text = Json.encodeToString(recentCalls.map {
+                                    it.asNetworkResource()
+                                }),
+                                contentType = ContentType.Application.Json,
+                            )
+                            repository.incrementQueryCounterFor(recentCalls.map { it.asEntity() })
+                        } catch (e: Exception) {
+                            if (e is SecurityException) {
+                                call.respondText(
+                                    text = Json.encodeToString(
+                                        NetworkError(
+                                            error = "You need to grant READ_CALL_LOG permission!",
+                                            code = 1001
+                                        )
+                                    ),
+                                    contentType = ContentType.Application.Json
+                                )
+                            }
+                        }
                     }
                     get("/status") {
                         try {
@@ -72,7 +87,17 @@ class KtorHttpServerManager @Inject constructor(
                                 contentType = ContentType.Application.Json
                             )
                         } catch (e: Exception) {
-                            Log.d("KtorHttpServerManager", e.toString())
+                            if (e is SecurityException) {
+                                call.respondText(
+                                    text = Json.encodeToString(
+                                        NetworkError(
+                                            error = "You need to grant READ_PHONE_STATE permission and if your API < 31 READ_CONTACTS permission!",
+                                            code = 1002
+                                        )
+                                    ),
+                                    contentType = ContentType.Application.Json
+                                )
+                            }
                         }
                     }
                 }
