@@ -12,12 +12,17 @@ class TestCallLogLocalDataSource : CallLogLocalDataSource {
 
     private val entitiesStateFlow = MutableStateFlow(emptyList<CallResourceEntity>())
     private val activeCallStateFlow: MutableStateFlow<ActiveCallInfo?> = MutableStateFlow(null)
+    private val callLogChangesStateFlow: MutableStateFlow<Unit> = MutableStateFlow(Unit)
     override suspend fun getRecentCalls(lastStartTime: Long?): List<CallResourceEntity> {
         return entitiesStateFlow.first()
     }
 
     override fun observeActiveCall(): Flow<ActiveCallInfo?> {
         return activeCallStateFlow
+    }
+
+    override fun observeCallLogChanges(): Flow<Unit> {
+        return callLogChangesStateFlow
     }
 
     fun sendCallResourceEntity(callResourceEntities: List<CallResourceEntity>) {
@@ -33,5 +38,9 @@ class TestCallLogLocalDataSource : CallLogLocalDataSource {
 
     fun sendActiveCallStatus(activeCallInfo: ActiveCallInfo) {
         activeCallStateFlow.value = activeCallInfo
+    }
+
+    fun sendCallLogChangedFlow() {
+        callLogChangesStateFlow.value = Unit
     }
 }

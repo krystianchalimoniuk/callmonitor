@@ -11,4 +11,6 @@ interface CallResourceRepository {
     suspend fun incrementQueryCounterFor(callResourceEntities: List<CallResourceEntity>)
     suspend fun markAsViewed(callResourceEntities: List<CallResourceEntity>)
     fun observeActiveCall(): Flow<ActiveCallInfo?>
+    fun observeCallLogChanges(): Flow<Unit>
+
 }

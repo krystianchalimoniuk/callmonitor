@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,11 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.nordsecurity.callmonitor.R
 import com.nordsecurity.callmonitor.core.designsystem.component.CallMonitorButton
@@ -67,7 +68,7 @@ fun HomeRoute(
         feedUiState = feedUiState,
         isSyncing = isSyncing,
         serverStatus = serverStatus,
-        onReadCallPermissionGranted = { viewModel.refreshCallsList() },
+        onReadCallLogPermissionGranted = { viewModel.onReadCallLogPermissionGranted() },
         onStartServer = { viewModel.startServer() },
         onStopServer = { viewModel.stopServer() },
     )
@@ -80,7 +81,7 @@ fun HomeScreen(
     feedUiState: HomeFeedUiState,
     isSyncing: Boolean,
     serverStatus: ServerStatus,
-    onReadCallPermissionGranted: () -> Unit,
+    onReadCallLogPermissionGranted: () -> Unit,
     onStartServer: () -> Unit,
     onStopServer: () -> Unit,
 ) {
@@ -91,7 +92,7 @@ fun HomeScreen(
     val state = rememberLazyStaggeredGridState()
 
     Column(modifier = modifier.padding(16.dp).fillMaxSize()) {
-        IpAddressText(ipAddress = "IP address: http://$ipAddress:8080" ?: "unknown")
+        IpAddressText(ipAddress = ipAddress)
         Spacer(modifier = Modifier.height(24.dp))
 
         LazyVerticalStaggeredGrid(
@@ -154,6 +155,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 onClick = onStartServer,
                 text = { Text(stringResource(R.string.start_server)) },
+                enabled = ipAddress != null,
                 leadingIcon = {
                     Icon(
                         imageVector = CallMonitorIcons.Start,
@@ -165,19 +167,22 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(32.dp))
     }
     TrackScreenViewEvent(screenName = "Home")
-    RequestAppPermissions(onReadCallPermissionGranted)
+    RequestAppPermissions(onReadCallLogPermissionGranted)
 }
 
 @Composable
 fun IpAddressText(
-    ipAddress: String,
+    ipAddress: String?,
     modifier: Modifier = Modifier,
 ) {
+
     SelectionContainer {
         Text(
-            ipAddress,
+            ipAddress?.let { "IP address: http://${it}:8080 " }
+                ?: stringResource(R.string.not_connected),
             style = MaterialTheme.typography.headlineSmall,
-            modifier = modifier,
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -186,7 +191,7 @@ fun IpAddressText(
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun RequestAppPermissions(
-    onAllPermissionsGranted: () -> Unit = {}
+    onReadCallLogPermissionsGranted: () -> Unit = {}
 ) {
     if (LocalInspectionMode.current) return
 
@@ -205,13 +210,15 @@ fun RequestAppPermissions(
 
     val permissionsState = rememberMultiplePermissionsState(permissions = permissionsToRequest) {
         if (it[Manifest.permission.READ_CALL_LOG] == true) {
-            onAllPermissionsGranted()
+            onReadCallLogPermissionsGranted()
         }
     }
 
     LaunchedEffect(permissionsState) {
         if (!permissionsState.allPermissionsGranted) {
             permissionsState.launchMultiplePermissionRequest()
+        } else if (permissionsState.permissions.find { it.permission == Manifest.permission.READ_CALL_LOG }?.status is PermissionStatus.Granted) {
+            onReadCallLogPermissionsGranted()
         }
     }
 }
@@ -253,7 +260,7 @@ fun HomeScreenPreview() {
         ),
         isSyncing = false,
         modifier = Modifier,
-        onReadCallPermissionGranted = {},
+        onReadCallLogPermissionGranted = {},
         onStartServer = {},
         onStopServer = {}
     )

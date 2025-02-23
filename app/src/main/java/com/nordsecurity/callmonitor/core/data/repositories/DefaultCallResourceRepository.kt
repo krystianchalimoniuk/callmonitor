@@ -28,7 +28,8 @@ class DefaultCallResourceRepository @Inject constructor(
     }
 
     override fun getCallResources(useNew: Boolean): Flow<List<CallResource>> {
-        return callResourceDao.getCallResources(useNew = useNew).map {it.map(CallResourceEntity::asExternalModel)  }
+        return callResourceDao.getCallResources(useNew = useNew)
+            .map { it.map(CallResourceEntity::asExternalModel) }
     }
 
     override suspend fun incrementQueryCounterFor(callResourceEntities: List<CallResourceEntity>) {
@@ -41,5 +42,9 @@ class DefaultCallResourceRepository @Inject constructor(
 
     override fun observeActiveCall(): Flow<ActiveCallInfo?> {
         return localDataSource.observeActiveCall()
+    }
+
+    override fun observeCallLogChanges(): Flow<Unit> {
+        return localDataSource.observeCallLogChanges()
     }
 }

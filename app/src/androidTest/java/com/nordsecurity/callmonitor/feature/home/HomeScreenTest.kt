@@ -3,7 +3,6 @@ package com.nordsecurity.callmonitor.feature.home
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -51,7 +50,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }
@@ -78,7 +77,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }
@@ -105,7 +104,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }
@@ -149,7 +148,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }
@@ -177,7 +176,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }
@@ -211,7 +210,7 @@ class HomeScreenTest {
                     modifier = Modifier,
                     onStartServer = {},
                     onStopServer = {},
-                    onReadCallPermissionGranted = {},
+                    onReadCallLogPermissionGranted = {},
                 )
             }
         }

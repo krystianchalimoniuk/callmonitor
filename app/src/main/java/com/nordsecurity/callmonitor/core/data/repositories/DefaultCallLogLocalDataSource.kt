@@ -1,9 +1,12 @@
 package com.nordsecurity.callmonitor.core.data.repositories
 
 import android.content.Context
+import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.telephony.PhoneStateListener
@@ -142,6 +145,22 @@ class DefaultCallLogLocalDataSource @Inject constructor(
         }
     }.flowOn(ioDispatcher)
         .conflate()
+
+    override fun observeCallLogChanges(): Flow<Unit> = callbackFlow {
+        val handler = Handler(Looper.getMainLooper())
+        val observer = object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                trySend(Unit)
+            }
+        }
+        context.contentResolver.registerContentObserver(
+            CallLog.Calls.CONTENT_URI,
+            true,
+            observer
+        )
+        awaitClose { context.contentResolver.unregisterContentObserver(observer) }
+    }.flowOn(ioDispatcher).conflate()
+
 
     private fun getContactNameFromNumber(context: Context, phoneNumber: String?): String? {
         if (phoneNumber.isNullOrBlank()) return null

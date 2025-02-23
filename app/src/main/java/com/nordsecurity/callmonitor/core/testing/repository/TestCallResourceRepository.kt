@@ -7,6 +7,7 @@ import com.nordsecurity.callmonitor.core.model.CallResource
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class TestCallResourceRepository : CallResourceRepository {
@@ -38,6 +39,9 @@ class TestCallResourceRepository : CallResourceRepository {
     }
 
     override fun observeActiveCall(): Flow<ActiveCallInfo?> = activeCallInfoFlow
+    override fun observeCallLogChanges(): Flow<Unit> {
+        return flowOf(Unit)
+    }
 
     /**
      * A test-only API to allow controlling the list of call resources from tests.

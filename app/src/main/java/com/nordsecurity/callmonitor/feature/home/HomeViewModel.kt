@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nordsecurity.callmonitor.core.domain.CallResourceRepository
 import com.nordsecurity.callmonitor.core.domain.IpAddressProvider
+import com.nordsecurity.callmonitor.core.domain.NetworkMonitor
 import com.nordsecurity.callmonitor.core.domain.ServerServiceController
 import com.nordsecurity.callmonitor.core.domain.SyncManager
 import com.nordsecurity.callmonitor.core.domain.UserDataRepository
@@ -12,10 +13,8 @@ import com.nordsecurity.callmonitor.core.model.CallResource
 import com.nordsecurity.callmonitor.core.model.ServerStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,13 +27,22 @@ class HomeViewModel @Inject constructor(
     private val serverServiceController: ServerServiceController,
     private val callResourceRepository: CallResourceRepository,
     syncManager: SyncManager,
+    networkMonitor: NetworkMonitor,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
 
-    private val _ipAddress: MutableStateFlow<String?> =
-        MutableStateFlow(ipAddressProvider.getLocalIpAddress())
-    val ipAddress: StateFlow<String?>
-        get() = _ipAddress.asStateFlow()
+
+    val ipAddress = networkMonitor.isOnline.map { isOnline ->
+        if (isOnline) {
+            ipAddressProvider.getLocalIpAddress()
+        } else {
+            null
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null
+    )
 
     val serverStatus = userDataRepository.userData.map {
         it.serverStatus
@@ -60,9 +68,16 @@ class HomeViewModel @Inject constructor(
             HomeFeedUiState.Loading
         )
 
-    fun refreshCallsList() {
+    fun onReadCallLogPermissionGranted() {
         viewModelScope.launch(Dispatchers.IO) {
-            callResourceRepository.refreshCallResources()
+            try {
+                callResourceRepository.refreshCallResources()
+                callResourceRepository.observeCallLogChanges().collect {
+                    callResourceRepository.refreshCallResources()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
