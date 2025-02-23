@@ -122,7 +122,7 @@ The application uses Hilt for dependency injection. Key components include:
 1. **Clone the Repository.**
 2. **Grant Permissions**: When running the application, ensure that all required runtime permissions are granted.
 3. **Disable Battery Optimization**: For optimal performance, disable battery optimization for the app on your device.
-4. **Run the Application**: The HTTP server will start automatically within a foreground service.
+4. **Run the Application**: The HTTP server will start after pushing "Start Server" button within a foreground service.
 
 ---
 
