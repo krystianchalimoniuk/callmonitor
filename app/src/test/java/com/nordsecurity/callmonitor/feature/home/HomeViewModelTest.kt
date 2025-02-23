@@ -2,6 +2,7 @@ package com.nordsecurity.callmonitor.feature.home
 
 import androidx.lifecycle.SavedStateHandle
 import com.nordsecurity.callmonitor.core.model.CallResource
+import com.nordsecurity.callmonitor.core.model.ServerStatus
 import com.nordsecurity.callmonitor.core.testing.repository.TestCallResourceRepository
 import com.nordsecurity.callmonitor.core.testing.repository.TestUserDataRepository
 import com.nordsecurity.callmonitor.core.testing.util.MainDispatcherRule
@@ -78,13 +79,21 @@ class HomeViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun ipAddressUpdatesAfterLoading() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.ipAddress.collect{} }
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.ipAddress.collect {} }
         assertEquals(mockedAddress, viewModel.ipAddress.value)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun serverStatusUpdatesAfterLoading() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.serverStatus.collect {} }
+        userDataRepository.setServerStatus(mockedServerStatus)
+        assertEquals(mockedServerStatus, viewModel.serverStatus.value)
     }
 
 }
 
-
+val mockedServerStatus = ServerStatus(isRunning = true, startTime = "2025-02-21T19:01:35.203Z")
 const val mockedAddress = "192.168.0.1"
 val sampleCallResources = listOf(
     CallResource(
