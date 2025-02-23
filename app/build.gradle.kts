@@ -1,5 +1,4 @@
 import com.google.protobuf.gradle.GenerateProtoTask
-import org.jetbrains.kotlin.cfg.pseudocode.and
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.room)
 
 }
 
@@ -24,6 +24,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     buildTypes {
