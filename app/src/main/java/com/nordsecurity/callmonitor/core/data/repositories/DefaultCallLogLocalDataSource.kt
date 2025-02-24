@@ -12,7 +12,6 @@ import android.provider.ContactsContract
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
-import android.util.Log
 import com.nordsecurity.callmonitor.core.common.network.CallMonitorDispatchers
 import com.nordsecurity.callmonitor.core.common.network.Dispatcher
 import com.nordsecurity.callmonitor.core.database.model.CallResourceEntity
@@ -61,7 +60,7 @@ class DefaultCallLogLocalDataSource @Inject constructor(
                 calls.add(CallResourceEntity(id, name, number, duration, date, timesQueried = 0))
             }
         }
-        return calls.take(50)
+        return calls
     }
 
 
